@@ -222,7 +222,7 @@ def run(
                             if label not in trajectory:
                                 trajectory[label] = []
                             annotator.box_label(bboxes, label, color=colors(c, True))
-                            height, width, =im0.shape
+                            height, width, _ =im0.shape
                             x1, y1, x2, y2 = max(0, int(bboxes[0])), max(0, int(bboxes[1])), min(width,int(bboxes[2])), min(height, int(bboxes[3]))
                             center = (int((x1 + x2) / 2), int((y1 + y2) / 2))
                             trajectory[label].append(center)
