@@ -117,6 +117,7 @@ def run(
 
     # Create as many strong sort instances as there are video sources
     tracker_list = []
+    trajectory = {}
     for i in range(nr_sources):
         tracker = create_tracker(tracking_method, appearance_descriptor_weights, device, half)
         tracker_list.append(tracker, )
@@ -218,7 +219,18 @@ def run(
                             id = int(id)  # integer id
                             label = None if hide_labels else (f'{id} {names[c]}' if hide_conf else \
                                 (f'{id} {conf:.2f}' if hide_class else f'{id} {names[c]} {conf:.2f}'))
+                            if label not in trajectory:
+                                trajectory[label] = []
                             annotator.box_label(bboxes, label, color=colors(c, True))
+                            height, width, =im0.shape
+                            x1, y1, x2, y2 = max(0, int(bboxes[0])), max(0, int(bboxes[1])), min(width,int(bboxes[2])), min(height, int(bboxes[3]))
+                            center = (int((x1 + x2) / 2), int((y1 + y2) / 2))
+                            trajectory[label].append(center)
+                            for t in range(1, len(trajectory[label])):
+                                if trajectory[label][t - 1] is None or trajectory[label][t] is None:
+                                    continue
+                                cv2.line(im0, trajectory[label][t - 1], trajectory[label][t], color=colors(c, True),
+                                         thickness=1)
                             if save_crop:
                                 txt_file_name = txt_file_name if (isinstance(path, list) and len(path) > 1) else ''
                                 save_one_box(bboxes, imc, file=save_dir / 'crops' / txt_file_name / names[c] / f'{id}' / f'{p.stem}.jpg', BGR=True)
@@ -289,8 +301,8 @@ def parse_opt():
     parser.add_argument('--project', default=ROOT / 'runs/track', help='save results to project/name')
     parser.add_argument('--name', default='exp', help='save results to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
-    parser.add_argument('--line-thickness', default=0, type=int, help='bounding box thickness (pixels)')
-    parser.add_argument('--hide-labels', default=True, action='store_true', help='hide labels')
+    parser.add_argument('--line-thickness', default=1, type=int, help='bounding box thickness (pixels)')
+    parser.add_argument('--hide-labels', default=False, action='store_true', help='hide labels')
     parser.add_argument('--hide-conf', default=True, action='store_true', help='hide confidences')
     parser.add_argument('--hide-class', default=True, action='store_true', help='hide IDs')
     parser.add_argument('--half', action='store_true', help='use FP16 half-precision inference')
