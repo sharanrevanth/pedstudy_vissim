@@ -118,6 +118,7 @@ def run(
     # Create as many strong sort instances as there are video sources
     tracker_list = []
     trajectory = {}
+    trajectorysave = {}
     for i in range(nr_sources):
         tracker = create_tracker(tracking_method, appearance_descriptor_weights, device, half)
         tracker_list.append(tracker, )
@@ -210,16 +211,16 @@ def run(
                             bbox_w = output[2] - output[0]
                             bbox_h = output[3] - output[1]
                             # Write MOT compliant results to file
-                            label = None if hide_labels else (f'{id} {names[c]}' if hide_conf else (f'{id} {conf:.2f}' if hide_class else f'{id} {names[c]} {conf:.2f}'))
-                            if label not in trajectory:
-                                trajectory[label] = []
-                            annotator.box_label(bboxes, label, color=colors(c, True))
+                            #label = None if hide_labels else (f'{id} {names[c]}' if hide_conf else (f'{id} {conf:.2f}' if hide_class else f'{id} {names[c]} {conf:.2f}'))
+                            if id not in trajectorysave:
+                                trajectorysave[id] = []
+                            #annotator.box_label(bboxes, label, color=colors(c, True))
                             height, width, _ = im0.shape
                             x1, y1, x2, y2 = max(0, int(bboxes[0])), max(0, int(bboxes[1])), min(width, int(bboxes[2])), min(height, int(bboxes[3]))
                             center = (int((x1 + x2) / 2), int((y1 + y2) / 2))
-                            trajectory[label].append(center)
+                            trajectorysave[id].append(center)
                             with open(txt_path + '.txt', 'a') as f:
-                                f.write(('%g ' * 10 + '\n') % (frame_idx + 1, id, trajectory[label]))
+                                f.write(('%g ' * 10 + '\n') % (frame_idx + 1, id, trajectorysave[id]))
 
                         if save_vid or save_crop or show_vid:  # Add bbox to image
                             c = int(cls)  # integer class
