@@ -210,9 +210,16 @@ def run(
                             bbox_w = output[2] - output[0]
                             bbox_h = output[3] - output[1]
                             # Write MOT compliant results to file
+                            label = None if hide_labels else (f'{id} {names[c]}' if hide_conf else (f'{id} {conf:.2f}' if hide_class else f'{id} {names[c]} {conf:.2f}'))
+                            if label not in trajectory:
+                                trajectory[label] = []
+                            annotator.box_label(bboxes, label, color=colors(c, True))
+                            height, width, _ = im0.shape
+                            x1, y1, x2, y2 = max(0, int(bboxes[0])), max(0, int(bboxes[1])), min(width, int(bboxes[2])), min(height, int(bboxes[3]))
+                            center = (int((x1 + x2) / 2), int((y1 + y2) / 2))
+                            trajectory[label].append(center)
                             with open(txt_path + '.txt', 'a') as f:
-                                f.write(('%g ' * 10 + '\n') % (frame_idx + 1, id, bbox_left,  # MOT format
-                                                               bbox_top, bbox_w, bbox_h, -1, -1, -1, i))
+                                f.write(('%g ' * 10 + '\n') % (frame_idx + 1, id, trajectory[label]))
 
                         if save_vid or save_crop or show_vid:  # Add bbox to image
                             c = int(cls)  # integer class
@@ -223,7 +230,7 @@ def run(
                                 trajectory[label] = []
                             annotator.box_label(bboxes, label, color=colors(c, True))
                             height, width, _ =im0.shape
-                            x1, y1, x2, y2 = max(0, int(bboxes[0])), max(0, int(bboxes[1])), min(width,int(bboxes[2])), min(height, int(bboxes[3]))
+                            x1, y1, x2, y2 = max(0, int(bboxes[0])), max(0, int(bboxes[1])), min(width, int(bboxes[2])), min(height, int(bboxes[3]))
                             center = (int((x1 + x2) / 2), int((y1 + y2) / 2))
                             trajectory[label].append(center)
                             for t in range(1, len(trajectory[label])):
