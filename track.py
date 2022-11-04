@@ -220,7 +220,8 @@ def run(
                             center = (int((x1 + x2) / 2), int((y1 + y2) / 2))
                             trajectorysave[id].append(center)
                             with open(txt_path + '.txt', 'a') as f:
-                                f.write(('%s ' * 100 + '\n') % (frame_idx + 1, id, trajectorysave[id]))
+                                f.write((str(trajectorysave)))
+                                f.write('\n')
 
                         if save_vid or save_crop or show_vid:  # Add bbox to image
                             c = int(cls)  # integer class
